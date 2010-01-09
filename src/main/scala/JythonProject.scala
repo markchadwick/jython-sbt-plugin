@@ -9,11 +9,10 @@ import _root_.sbt._
  * resolver in a somewhat cripped easy_install manner.
  */
 trait JythonProject extends ScalaProject
-                    with JythonPaths {
+                    with JythonPaths
+                    with PyPiManagedProject {
 
-  def jythonHome = Path.fromFile("/tmp/jython")
-
-  lazy val jython = "org.python" % "jython" % Jython.jar
+  def jythonHome = Path.fromFile("/opt/jython")
 
   def copyMainJythonResourcesAction =
     syncPathsTask(mainJythonResources, mainJythonOutputPath)
@@ -22,5 +21,4 @@ trait JythonProject extends ScalaProject
     syncPathsTask(testJythonResources, testJythonOutputPath)
 
   lazy val copyJythonResources = copyMainJythonResourcesAction
-
 }
