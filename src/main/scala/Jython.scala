@@ -10,6 +10,8 @@ object Jython {
 
   lazy val jython = jythonFile.getAbsolutePath
   lazy val jythonHome = jythonFile.getParent
+  lazy val version = "2.5.1"
+  lazy val jar = "file://%s/jython.jar".format(jythonHome)
 
   private def findInPath(exeName: String): Option[File] = {
     System.getenv("PATH").split(File.pathSeparator)

@@ -1,0 +1,17 @@
+> copy-jython-resources
+[success]
+
+$ exists target/python/impl.py
+[success]
+
+$ exists target/python/test.py
+[success]
+
+> clean
+[success]
+
+$ exists target/python/impl.py
+[failure]
+
+$ exists target/python/test.py
+[failure]

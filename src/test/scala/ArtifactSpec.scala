@@ -1,11 +1,10 @@
 package jython.sbt
 
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import _root_.org.scalatest.FlatSpec
+import _root_.org.scalatest.matchers.ShouldMatchers
 
 class ArtifactSpec extends FlatSpec
-                   with ShouldMatchers
-                   with JythonResolver {
+                   with ShouldMatchers {
 
   "An Artifact" should "have be able to be constructed" in {
     val artifact = Artifact(Repository(), "django")
@@ -25,6 +24,7 @@ class ArtifactSpec extends FlatSpec
     version.name should equal (Some("1.1"))
   }
 
+  /*
   it should "resolve the python mixin" in {
     python should not be (null)
   }
@@ -41,4 +41,5 @@ class ArtifactSpec extends FlatSpec
     version.artifact.name should equal ("django")
     version.name should equal (Some("1.1"))
   }
+  */
 }

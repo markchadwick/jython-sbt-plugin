@@ -1,6 +1,6 @@
 package jython.sbt
 
-import sbt._
+import _root_.sbt._
 
 /**
  * Trait to mix in when dealing with Jython code in an SBT project. This take
@@ -8,13 +8,19 @@ import sbt._
  * and are monitered by changes by sbt tasks which need to. Dependencies are
  * resolver in a somewhat cripped easy_install manner.
  */
-trait JythonProject extends JythonPaths {
+trait JythonProject extends ScalaProject
+                    with JythonPaths {
 
-  /*
+  def jythonHome = Path.fromFile("/tmp/jython")
+
+  lazy val jython = "org.python" % "jython" % Jython.jar
+
   def copyMainJythonResourcesAction =
-    FileUtilities.syncPaths(mainJythonResources, mainJythonOutputPath)
+    syncPathsTask(mainJythonResources, mainJythonOutputPath)
 
   def copyTestJythonResourcesAction =
     syncPathsTask(testJythonResources, testJythonOutputPath)
-  */
+
+  lazy val copyJythonResources = copyMainJythonResourcesAction
+
 }
