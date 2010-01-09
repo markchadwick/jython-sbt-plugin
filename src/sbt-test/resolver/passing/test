@@ -1,2 +1,5 @@
 > update
 [success]
+
+#$ exists lib_managed
+#[success]
