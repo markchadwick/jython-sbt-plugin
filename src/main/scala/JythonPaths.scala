@@ -7,6 +7,8 @@ trait JythonPaths extends MavenStyleScalaPaths
 
   val DefaultJythonSourceName   = "python"
   val DefaultJythonTestName     = "python"
+  // val DefaultJythonContainerPath = managedDirectoryName
+  val DefaultJythonContainerPath = "lib"
   val DefaultJythonPackagesName = "site-packages"
 
   def jythonSourceDirectoryName = DefaultJythonSourceName
@@ -18,7 +20,7 @@ trait JythonPaths extends MavenStyleScalaPaths
   def mainJythonOutputPath = outputPath / DefaultJythonSourceName
   def testJythonOutputPath = outputPath / DefaultJythonTestName
 
-  def jythonPackagePath = managedDirectoryName / DefaultJythonPackagesName
+  def jythonPackagePath = DefaultJythonContainerPath / DefaultJythonPackagesName
 
   def mainJythonResources = descendents(mainJythonPath ##, "*")
   def testJythonResources = descendents(testJythonPath ##, "*")

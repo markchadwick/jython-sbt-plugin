@@ -48,13 +48,11 @@ object Jython {
     val javaArgs = "-Xmx512m" :: "-Xss1024k" ::
                    "-classpath" :: classpath ::
                    "-Dpython.home=%s".format(jythonHome.absolutePath) ::
+                   "-Dpython.path=%s".format(sitePackages.absolutePath) ::
+                   "-Djython.path=%s".format(sitePackages.absolutePath) ::
                    "-Dpython.executable=%s".format(jythonExe(jythonHome).absolutePath) ::
                    jythonMain ::
                    args
-
-    println("* FORKING JAVA WITH:"+ javaArgs)
-    val ja = javaArgs.reduceLeft(_ +" "+ _)
-    println("* Args: "+ ja)
 
     Fork.java(None, javaArgs, None, jythonEnv(jythonHome, sitePackages), LoggedOutput(log))
   }
@@ -67,9 +65,10 @@ object Jython {
     val easySetupPath = sitePackages / "ez_setup.py"
     ensureSetupTools(sitePackages, easySetupPath, log)
     val args = easySetupPath.absolutePath ::
-               "--find-links"  :: repo.toString ::
+               "--find-links" :: repo.toString ::
                "--always-copy" ::
                "--install-dir" :: sitePackages.absolutePath ::
+               "-S" :: sitePackages.absolutePath ::
                query :: Nil
 
     execute(jythonHome, args, sitePackages, log)
@@ -82,8 +81,8 @@ object Jython {
     }
 
   private def bootstrapSetupTools(sitePackages: Path, ezSetup: Path, log: Logger) {
-    log.warn("* ez_setup missing from %s. downloading".format(ezSetup))
-    FileUtilities.createDirectory(sitePackages, log)
+    log.warn("ez_setup missing from %s. downloading".format(ezSetup))
+    sitePackages.asFile.mkdirs()
     val file = ezSetup.asFile
     file.createNewFile
     log.info("Downloading from %s to %s".format(easySetupUrl, file))
