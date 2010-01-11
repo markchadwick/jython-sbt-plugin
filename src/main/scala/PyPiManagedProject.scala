@@ -28,7 +28,7 @@ trait PyPiManagedProject extends BasicManagedProject {
 
   def updateJythonDependencies(sitePackages: Path) = {
     jythonDependences.find(dep => {
-      log.info("Installing: "+ dep)
+      log.info("Installing %s from %s".format(dep.query, dep.repoUrl))
       Jython.easyInstall(dep.query, dep.repoUrl, sitePackages, jythonHome, log) != 0
     }) match {
       case None => 

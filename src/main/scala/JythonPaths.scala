@@ -5,11 +5,10 @@ import _root_.sbt._
 trait JythonPaths extends MavenStyleScalaPaths 
                   with BasicDependencyPaths {
 
-  val DefaultJythonSourceName   = "python"
-  val DefaultJythonTestName     = "python"
-  // val DefaultJythonContainerPath = managedDirectoryName
+  val DefaultJythonSourceName    = "python"
+  val DefaultJythonTestName      = "python"
   val DefaultJythonContainerPath = "lib"
-  val DefaultJythonPackagesName = "site-packages"
+  val DefaultJythonPackagesName  = "site-packages"
 
   def jythonSourceDirectoryName = DefaultJythonSourceName
   def jythonTestDirectoryName   = DefaultJythonTestName
