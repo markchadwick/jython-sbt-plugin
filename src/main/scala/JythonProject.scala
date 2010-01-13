@@ -17,20 +17,31 @@ trait JythonProject extends BasicScalaProject
 
   def jythonHome = Path.fromFile("/opt/jython")
 
-  def copyMainJythonResourcesAction =
+  protected def copyMainJythonResourcesAction =
     syncPathsTask(mainJythonResources, mainJythonOutputPath)
 
-  def copyTestJythonResourcesAction =
+  protected def copyTestJythonResourcesAction =
     syncPathsTask(testJythonResources, testJythonOutputPath)
 
-  def setupJythonEnvAction = task {
+  protected def setupJythonEnvAction = task {
     Jython.setupJythonEnv(jythonHome)
     None
   }
 
+  protected def jythonConsoleAction = interactiveTask {
+    Jython.execute(jythonHome, Nil, log) match {
+      case 0 => None
+      case i => Some("Jython Console Failed with error: "+ i)
+    }
+  }
+
+
   lazy val copyJythonResources     = copyMainJythonResourcesAction
   lazy val copyJythonTestResources = copyTestJythonResourcesAction
   lazy val setupJythonEnv          = setupJythonEnvAction
+  lazy val jythonConsole = jythonConsoleAction
+                            .dependsOn(testCompile, copyResources, copyTestResources)
+                            .describedAs("Start an interactive Jython Console")
 
   override def copyResourcesAction =
     super.copyResourcesAction.dependsOn(copyJythonResources)
