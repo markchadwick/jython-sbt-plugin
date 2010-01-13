@@ -2,4 +2,4 @@
 [success]
 
 > nosetests
-[success]
+[failure]
