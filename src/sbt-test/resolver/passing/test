@@ -1,5 +1,5 @@
 > update
 [success]
 
-#$ exists lib_managed
-#[success]
+$ exists lib/site-packages/easy-install.pth
+[success]

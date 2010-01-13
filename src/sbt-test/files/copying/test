@@ -1,10 +1,19 @@
-> copy-jython-resources
+> copy-resources
 [success]
 
 $ exists target/python/impl.py
 [success]
 
-$ exists target/python/test.py
+$ exists target/test-python/test.py
+[failure]
+
+> copy-test-resources
+[success]
+
+$ exists target/python/impl.py
+[success]
+
+$ exists target/test-python/test.py
 [success]
 
 > clean

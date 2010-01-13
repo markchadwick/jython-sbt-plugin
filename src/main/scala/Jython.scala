@@ -66,7 +66,7 @@ object Jython {
 
   private def ensureSetupTools(sitePackages: Path, ezSetup: Path, log: Logger) =
     ezSetup.exists match {
-      case true => log.info("ez_setup exists. We're cool")
+      case true => log.info("ez_setup exists")
       case false => bootstrapSetupTools(sitePackages, ezSetup, log)
     }
 
