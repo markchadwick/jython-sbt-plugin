@@ -25,16 +25,15 @@ object Jython {
 
 
   def execute(jythonHome: Path, args: List[String], log: Logger): Int = {
-    val classpath = mkPath(jythonJar(jythonHome).absolutePath ::
-                           jythonLib(jythonHome).absolutePath ::
-                           pythonPaths.map(_.absolutePath))
+    val classpath = Path.makeString(jythonJar(jythonHome) ::
+                                    jythonLib(jythonHome) ::
+                                    pythonPaths)
 
-    val pythonPath = mkPath(pythonPaths.map(_.absolutePath))
     val javaArgs = "-Xmx512m" :: "-Xss1024k" ::
                    "-classpath" :: classpath ::
                    "-Dpython.home=%s".format(jythonHome.absolutePath) ::
-                   "-Dpython.path=%s".format(pythonPath) ::
-                   "-Djython.path=%s".format(pythonPath) ::
+                   "-Dpython.path=%s".format(classpath) ::
+                   "-Djython.path=%s".format(classpath) ::
                    "-Dpython.executable=%s".format(jythonExe(jythonHome).absolutePath) ::
                    jythonMain ::
                    args
@@ -44,11 +43,11 @@ object Jython {
 
   def jythonEnv(jythonHome: Path) =
     Map("JYTHON_HOME"-> jythonHome.absolutePath,
-        "PYTHONPATH" -> mkPath(pythonPaths.map(_.absolutePath)))
+        "PYTHONPATH" -> Path.makeString(pythonPaths))
 
   def setupJythonEnv(jythonHome: Path) =
     Map("jython.home" -> jythonHome.absolutePath,
-        "python.path" -> mkPath(pythonPaths.map(_.absolutePath)))
+        "python.path" -> Path.makeString(pythonPaths))
        .foreach(param => System.setProperty(param._1, param._2)) 
 
   def easyInstall(query: String, repo: URL, sitePackages: Path, jythonHome: Path, log: Logger) = {
@@ -78,9 +77,6 @@ object Jython {
     log.info("Downloading from %s to %s".format(easySetupUrl, file))
     FileUtilities.download(easySetupUrl, file, log)
   }
-
-  private def mkPath(paths: Seq[String]): String =
-    paths.reduceLeft(_ + File.pathSeparator + _)
 
   /*
   val JythonExecutable = "jython"
