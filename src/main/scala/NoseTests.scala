@@ -7,9 +7,9 @@ trait NoseTests extends JythonProject {
 
   lazy val nosetestsExecutablePath = jythonPackagePath / "nosetests"
 
-  protected def nosetestTask(testRoot: Path) = task {
+  protected def nosetestTask(testRoot: Path) = interactiveTask {
     val args = nosetestsExecutablePath.absolutePath ::
-               testRoot.absolutePath :: Nil
+               testJythonOutputPath.absolutePath :: Nil
 
     Jython.execute(jythonHome, args, log) match {
       case 0 => None
