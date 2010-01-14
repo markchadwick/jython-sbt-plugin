@@ -20,8 +20,11 @@ object Jython {
   def jythonExe(jythonHome: Path) = jythonHome / "jython"
   def jythonLib(jythonHome: Path) = jythonHome / "Lib"
 
-  def registerPath(pythonPath: Path) = 
-    pythonPaths ::= pythonPath 
+  def registerPath(pythonPaths: Path*) = 
+    this.pythonPaths :::= pythonPaths.toList
+
+  def registerJars(jars: Iterable[File]) =
+    this.pythonPaths :::= jars.map(jar => Path.fromFile(jar)).toList
 
 
   def execute(jythonHome: Path, args: List[String], log: Logger): Int = {

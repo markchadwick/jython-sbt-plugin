@@ -14,8 +14,9 @@ trait JythonProject extends BasicScalaProject
 
   Jython.registerPath(jythonPackagePath)
   Jython.registerPath(mainJythonOutputPath)
-  // Jython.registerPath(mainCompilePath)
-  // Jython.registerPath(testCompilePath)
+  Jython.registerPath(mainCompilePath)
+  Jython.registerPath(testCompilePath)
+  Jython.registerPath(mainDependencies.all.get.toList:_*)
 
   def jythonHome = Path.fromFile("/opt/jython")
 
