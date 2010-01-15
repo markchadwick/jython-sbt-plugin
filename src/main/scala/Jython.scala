@@ -21,8 +21,8 @@ object Jython {
   def jythonExe(jythonHome: Path) = jythonHome / "jython"
   def jythonLib(jythonHome: Path) = jythonHome / "Lib"
 
-  def registerPath(pythonPaths: Path*) = 
-    this.pythonPaths :::= pythonPaths.toList
+  def registerPath(pythonPath: Path) = 
+    this.pythonPaths ::= pythonPath
 
   def registerJars(jars: Iterable[File]) =
     this.pythonPaths :::= jars.map(jar => Path.fromFile(jar)).toList
@@ -42,7 +42,8 @@ object Jython {
                    jythonMain ::
                    args
 
-    // Fork.java(None, javaArgs, None, jythonEnv(jythonHome), LoggedOutput(log))
+    // println("* Classpath: "+ classpath)
+    // println("* Java: "+ javaArgs.mkString(" "))
     Fork.java(None, javaArgs, None, jythonEnv(jythonHome), log)
   }
 

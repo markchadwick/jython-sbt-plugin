@@ -12,11 +12,16 @@ trait JythonProject extends BasicScalaProject
                     with JythonPaths
                     with PyPiManagedProject {
 
-  Jython.registerPath(jythonPackagePath)
-  Jython.registerPath(mainJythonOutputPath)
-  Jython.registerPath(mainCompilePath)
-  Jython.registerPath(testCompilePath)
-  Jython.registerPath(mainDependencies.all.get.toList:_*)
+  def registerJythonPathAction = task {
+    Jython.registerPath(jythonPackagePath)
+    Jython.registerPath(mainJythonOutputPath)
+    Jython.registerPath(mainCompilePath)
+    Jython.registerPath(testCompilePath)
+    testClasspath.get.foreach(dep => Jython.registerPath(dep))
+    mainDependencies.scalaJars.get.foreach(dep => Jython.registerPath(dep))
+
+    None
+  }
 
   def jythonHome = Path.fromFile("/opt/jython")
 
@@ -41,10 +46,12 @@ trait JythonProject extends BasicScalaProject
 
   lazy val copyJythonResources     = copyMainJythonResourcesAction
   lazy val copyJythonTestResources = copyTestJythonResourcesAction
-  lazy val setupJythonEnv          = setupJythonEnvAction
+  lazy val setupJythonEnv          = setupJythonEnvAction dependsOn(registerJythonPathAction)
   lazy val jythonConsole = jythonConsoleAction
                             .dependsOn(testCompile, copyResources, copyTestResources)
                             .describedAs("Start an interactive Jython Console")
+
+
 
   override def copyResourcesAction =
     super.copyResourcesAction.dependsOn(copyJythonResources)
