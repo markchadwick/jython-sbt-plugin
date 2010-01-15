@@ -32,7 +32,7 @@ trait JythonProject extends BasicScalaProject
   }
 
   protected def jythonConsoleAction = interactiveTask {
-    Jython.execute(jythonHome, Nil, log) match {
+    Jython.execute(jythonHome, Nil, StdoutOutput) match {
       case 0 => None
       case i => Some("Jython Console Failed with error: "+ i)
     }

@@ -8,6 +8,7 @@ import _root_.sbt.Fork
 import _root_.sbt.Logger
 import _root_.sbt.Path
 import _root_.sbt.LoggedOutput
+import _root_.sbt.OutputStrategy
 
 object Jython {
   private var pythonPaths: List[Path] = Nil
@@ -27,7 +28,7 @@ object Jython {
     this.pythonPaths :::= jars.map(jar => Path.fromFile(jar)).toList
 
 
-  def execute(jythonHome: Path, args: List[String], log: Logger): Int = {
+  def execute(jythonHome: Path, args: List[String], log: OutputStrategy): Int = {
     val classpath = Path.makeString(jythonJar(jythonHome) ::
                                     jythonLib(jythonHome) ::
                                     pythonPaths)
@@ -41,7 +42,8 @@ object Jython {
                    jythonMain ::
                    args
 
-    Fork.java(None, javaArgs, None, jythonEnv(jythonHome), LoggedOutput(log))
+    // Fork.java(None, javaArgs, None, jythonEnv(jythonHome), LoggedOutput(log))
+    Fork.java(None, javaArgs, None, jythonEnv(jythonHome), log)
   }
 
   def jythonEnv(jythonHome: Path) =
@@ -63,7 +65,7 @@ object Jython {
                "-S" :: sitePackages.absolutePath ::
                query :: Nil
 
-    execute(jythonHome, args, log)
+    execute(jythonHome, args, LoggedOutput(log))
   }
 
   private def ensureSetupTools(sitePackages: Path, ezSetup: Path, log: Logger) =

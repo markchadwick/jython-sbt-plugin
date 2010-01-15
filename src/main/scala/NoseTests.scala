@@ -11,7 +11,7 @@ trait NoseTests extends JythonProject {
     val args = nosetestsExecutablePath.absolutePath ::
                testJythonOutputPath.absolutePath :: Nil
 
-    Jython.execute(jythonHome, args, log) match {
+    Jython.execute(jythonHome, args, StdoutOutput) match {
       case 0 => None
       case i => Some("nosetests Failed with error: "+ i)
     }
