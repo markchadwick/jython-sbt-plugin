@@ -3,6 +3,20 @@ package jython.sbt
 import _root_.sbt._
 import java.net.URL
 
+/**
+ * Manage Pypi dependencies in a JythonProject. The format given is idential to
+ * the one easy_install accepts. For example, <cc>"threadpool"</cc> for the most
+ * recent version, <cc>"threadpool == 0.2"</cc> for an exact version, and so on
+ * and so forth.
+ *
+ * If you'd like for a given dependency to be pulled from a location other that
+ * pyi, simply use the <cc>from</cc> keyword after the <cc>easy_install</cc>
+ * declaration. For example:
+ * <code>
+ *    val django = easy_install("django &gt;= 1.0")
+ *    val internal = easy_install("internal_suite") from "http://local/repo/"
+ * </code>
+ */
 class JythonDependency(val query: String, var url: Option[String]) {
   val pypiUrl = "http://pypi.python.org/simple"
 

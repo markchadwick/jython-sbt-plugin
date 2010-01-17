@@ -1,7 +1,6 @@
 package jython.sbt
 
 import java.io.File
-import java.io.FileOutputStream
 import java.net.URL
 import _root_.sbt.FileUtilities
 import _root_.sbt.Fork
@@ -10,6 +9,11 @@ import _root_.sbt.Path
 import _root_.sbt.LoggedOutput
 import _root_.sbt.OutputStrategy
 
+/**
+ * Utility for forking Jython processes configured for this project. These
+ * methods need a full Jython install to run property (even if the project has a
+ * dependecy on Jython).
+ */
 object Jython {
   private var pythonPaths: List[Path] = Nil
 
@@ -27,7 +31,12 @@ object Jython {
   def registerJars(jars: Iterable[File]) =
     this.pythonPaths :::= jars.map(jar => Path.fromFile(jar)).toList
 
-
+  /**
+   * Given a set of params, fork a Jython process. This will use a full install
+   * of Jython to run the process, which may be confusing if you have one
+   * version of Jython installed, an another defined in your project (This will
+   * always used the installed version).
+   */
   def execute(jythonHome: Path, args: List[String], log: OutputStrategy): Int = {
     val classpath = Path.makeString(jythonJar(jythonHome) ::
                                     jythonLib(jythonHome) ::
@@ -42,8 +51,6 @@ object Jython {
                    jythonMain ::
                    args
 
-    // println("* Classpath: "+ classpath)
-    // println("* Java: "+ javaArgs.mkString(" "))
     Fork.java(None, javaArgs, None, jythonEnv(jythonHome), log)
   }
 
@@ -56,6 +63,21 @@ object Jython {
         "python.path" -> Path.makeString(pythonPaths))
        .foreach(param => System.setProperty(param._1, param._2)) 
 
+  /**
+   * easy_install a dependency into the given site-packages directory. This will
+   * ensure the directory is bootstrapped, and managed further dependencies of
+   * the given dependency.
+   *
+   * @param query easy_install style query for a dependency. For example,
+   *        <cc>django</cc> or <cc>myTools == 1.2</cc>.
+   * @param rep pypi-like repository to fetch dependencies from. Setuptools may
+   *        fall back to the main pypi repo if the given repo doesn't contain
+   *        the given dependency.
+   * @param sitePackages Local site-packages path to install the dependency to
+   * @param jythonHome Jython install location
+   * @param log Logger to dump info and errors to
+   * @returns 0 if successful, otherwise 1
+   */
   def easyInstall(query: String, repo: URL, sitePackages: Path, jythonHome: Path, log: Logger) = {
     val easySetupPath = sitePackages / "ez_setup.py"
     ensureSetupTools(sitePackages, easySetupPath, log)
@@ -69,12 +91,32 @@ object Jython {
     execute(jythonHome, args, LoggedOutput(log))
   }
 
+  /**
+   * Ensures that the given <cc>sitePackages</cc> path has been bootstrapped
+   * with an ezSetup file. If ezSetup file exists, this will quickly exit,
+   * otherwise, it will download it from the web, and save it to the expected
+   * location.
+   *
+   * @param sitePackages Path of the local site-packages install
+   * @param ezSetup Path of the expected ez_setup boostrapping script
+   * @param log Logger to dump info and errors to
+   */
   private def ensureSetupTools(sitePackages: Path, ezSetup: Path, log: Logger) =
     ezSetup.exists match {
       case true => log.info("ez_setup exists")
       case false => bootstrapSetupTools(sitePackages, ezSetup, log)
     }
 
+  /**
+   * Downloads a setuptools bootstrapping script from the web. This should only
+   * happen once in a project. The downloaded setup script will live in the
+   * local site-packages, so cleaning dependencies may nuke this script.
+   *
+   * @param sitePackages Path to a site-packages diretory, which expects to have
+   *        an easy_install bootstrapping script.
+   * @param ezSetup Path to download the bootstrapping scrip to
+   * @param log Logger to dump output to on info and errors
+   */
   private def bootstrapSetupTools(sitePackages: Path, ezSetup: Path, log: Logger) {
     log.warn("ez_setup missing from %s. downloading".format(ezSetup))
     sitePackages.asFile.mkdirs()
@@ -83,23 +125,4 @@ object Jython {
     log.info("Downloading from %s to %s".format(easySetupUrl, file))
     FileUtilities.download(easySetupUrl, file, log)
   }
-
-  /*
-  val JythonExecutable = "jython"
-
-  lazy val jythonFile = findInPath(JythonExecutable).getOrElse(
-    throw new Exception("Couldn't find executable: %s".format(JythonExecutable)))
-
-  lazy val jython = jythonFile.getAbsolutePath
-  lazy val jythonHome = jythonFile.getParent
-  lazy val version = "2.5.1"
-  lazy val jar = "file://%s/jython.jar".format(jythonHome)
-
-  private def findInPath(exeName: String): Option[File] = {
-    System.getenv("PATH").split(File.pathSeparator)
-                         .map(new File(_).listFiles.toList)
-                         .flatMap(f => f)
-                         .find(_.getName == exeName)
-  }
-  */
 }

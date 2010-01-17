@@ -4,14 +4,32 @@ import _root_.sbt._
 
 /**
  * Trait to mix in when dealing with Jython code in an SBT project. This take
- * care of ensuring python files are put in the right directories at build time,
- * and are monitered by changes by sbt tasks which need to. Dependencies are
- * resolver in a somewhat cripped easy_install manner.
+ * care of ensuring python files are put in the right directories at build time.
+ * Follow the maven convention, python source files live in
+ * <cc>src/main/python</cc>, and test files live in <cc>src/test/python</cc>.
+ * Their respective "build" files are in python and test-python.
+ *
+ * This implementation, at the moment, is perhaps a little generous about what
+ * it will include in the classpath at compile and test time. Given that this is
+ * all quickly hacked out, I expect this to change as problems are discovered.
+ *
+ * In order to have a project mix in <cc>JythonProject</cc>, it must define the
+ * <cc>jythonHome</cc> method. An example implementation may be something like:
+ * <code>
+ *    def jythonHome = Path.fromFile("/opt/jython")
+ * </code>
  */
 trait JythonProject extends BasicScalaProject
                     with JythonPaths
                     with PyPiManagedProject {
 
+  def jythonHome: Path
+
+  /**
+   * A task to register a magic set of paths which were discovered by trial and
+   * error. Each path registered will be in the (class|python)path when forking
+   * a Jython project. This may be a bit excessive.
+   */
   def registerJythonPathAction = task {
     Jython.registerPath(jythonPackagePath)
     Jython.registerPath(mainJythonOutputPath)
@@ -22,8 +40,6 @@ trait JythonProject extends BasicScalaProject
 
     None
   }
-
-  def jythonHome = Path.fromFile("/opt/jython")
 
   protected def copyMainJythonResourcesAction =
     syncPathsTask(mainJythonResources, mainJythonOutputPath)
@@ -36,6 +52,11 @@ trait JythonProject extends BasicScalaProject
     None
   }
 
+  /**
+   * Start a Jython console. At the moment, this is broken. Fortunatly, both the
+   * Scala and Jython REPLs use JLine, so integrating the Jython console may not
+   * be an impossibe task. At a code level, they are quite similar.
+   */
   protected def jythonConsoleAction = interactiveTask {
     Jython.execute(jythonHome, Nil, StdoutOutput) match {
       case 0 => None
@@ -43,15 +64,13 @@ trait JythonProject extends BasicScalaProject
     }
   }
 
+  lazy val jythonConsole = jythonConsoleAction
+                            .dependsOn(testCompile, copyResources, copyTestResources)
+                            .describedAs("Interactive Jython Console (Broken)")
 
   lazy val copyJythonResources     = copyMainJythonResourcesAction
   lazy val copyJythonTestResources = copyTestJythonResourcesAction
   lazy val setupJythonEnv          = setupJythonEnvAction dependsOn(registerJythonPathAction)
-  lazy val jythonConsole = jythonConsoleAction
-                            .dependsOn(testCompile, copyResources, copyTestResources)
-                            .describedAs("Start an interactive Jython Console")
-
-
 
   override def copyResourcesAction =
     super.copyResourcesAction.dependsOn(copyJythonResources)
