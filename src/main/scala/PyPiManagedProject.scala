@@ -2,6 +2,9 @@ package jython.sbt
 
 import _root_.sbt._
 import java.net.URL
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.Set
+import scala.collection.mutable.MultiMap
 
 /**
  * Manage Pypi dependencies in a JythonProject. The format given is idential to
@@ -41,6 +44,11 @@ trait PyPiManagedProject extends BasicManagedProject {
   }
 
   def updateJythonDependencies(sitePackages: Path) = {
+    val depsByLoc = new HashMap[URL, Set[JythonDependency]]
+                        with MultiMap[URL, JythonDependency]
+
+    jythonDependences.foreach(dep => depsByLoc add (dep.repoUrl, dep))
+
     jythonDependences.find(dep => {
       log.info("Installing %s from %s".format(dep.query, dep.repoUrl))
       Jython.easyInstall(dep.query, dep.repoUrl, sitePackages, jythonHome, log) != 0
