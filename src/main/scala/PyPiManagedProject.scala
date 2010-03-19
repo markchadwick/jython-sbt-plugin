@@ -2,6 +2,9 @@ package jython.sbt
 
 import _root_.sbt._
 import java.net.URL
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.Set
+import scala.collection.mutable.MultiMap
 
 /**
  * Manage Pypi dependencies in a JythonProject. The format given is idential to
@@ -27,6 +30,8 @@ class JythonDependency(val query: String, var url: Option[String]) {
     case None => new URL(pypiUrl)
     case Some(u) => new URL(u)
   }
+
+  override def toString = query
 }
 
 trait PyPiManagedProject extends BasicManagedProject {
@@ -41,13 +46,19 @@ trait PyPiManagedProject extends BasicManagedProject {
   }
 
   def updateJythonDependencies(sitePackages: Path) = {
-    jythonDependences.find(dep => {
-      log.info("Installing %s from %s".format(dep.query, dep.repoUrl))
-      Jython.easyInstall(dep.query, dep.repoUrl, sitePackages, jythonHome, log) != 0
+    val depsByLoc = new HashMap[URL, Set[JythonDependency]]
+                        with MultiMap[URL, JythonDependency]
+
+    jythonDependences.foreach(dep => depsByLoc add (dep.repoUrl, dep))
+
+    depsByLoc.find(dep => {
+      val (location, dependencies) = dep
+      val queries = dependencies.map(_.query).toList
+      log.info("Installing %s from %s".format(queries.mkString(", "), location))
+      Jython.easyInstall(queries, location, sitePackages, jythonHome, log) != 0
     }) match {
       case None => 
-      case Some(failedDep) =>
-        log.warn("Error installing "+ failedDep.query)
+      case Some(failedDep) => log.warn("Error installing "+ failedDep)
     }
 
     None

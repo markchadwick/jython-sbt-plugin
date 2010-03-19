@@ -78,15 +78,16 @@ object Jython {
    * @param log Logger to dump info and errors to
    * @returns 0 if successful, otherwise 1
    */
-  def easyInstall(query: String, repo: URL, sitePackages: Path, jythonHome: Path, log: Logger) = {
+  def easyInstall(queries: List[String], repo: URL, sitePackages: Path, jythonHome: Path, log: Logger) = {
     val easySetupPath = sitePackages / "ez_setup.py"
-    ensureSetupTools(sitePackages, easySetupPath, log)
-    val args = easySetupPath.absolutePath ::
+    val easyInstallPath = sitePackages / "easy_install"
+    ensureSetupTools(jythonHome, sitePackages, easySetupPath, log)
+    val args = easyInstallPath.absolutePath ::
                "--find-links" :: repo.toString ::
                "--always-copy" ::
                "--install-dir" :: sitePackages.absolutePath ::
                "-S" :: sitePackages.absolutePath ::
-               query :: Nil
+               queries
 
     execute(jythonHome, args, LoggedOutput(log))
   }
@@ -101,28 +102,43 @@ object Jython {
    * @param ezSetup Path of the expected ez_setup boostrapping script
    * @param log Logger to dump info and errors to
    */
-  private def ensureSetupTools(sitePackages: Path, ezSetup: Path, log: Logger) =
+  private def ensureSetupTools(jythonHome: Path, sitePackages: Path,
+                               ezSetup: Path, log: Logger) =
     ezSetup.exists match {
       case true => log.info("ez_setup exists")
-      case false => bootstrapSetupTools(sitePackages, ezSetup, log)
+      case false => bootstrapSetupTools(jythonHome, sitePackages, ezSetup, log)
     }
 
   /**
    * Downloads a setuptools bootstrapping script from the web. This should only
    * happen once in a project. The downloaded setup script will live in the
-   * local site-packages, so cleaning dependencies may nuke this script.
+   * local site-packages, so cleaning dependencies may nuke this script. Once
+   * this script is downloaded, it'll do a local install of setuptools to speed
+   * things up in the future.
    *
    * @param sitePackages Path to a site-packages diretory, which expects to have
    *        an easy_install bootstrapping script.
    * @param ezSetup Path to download the bootstrapping scrip to
    * @param log Logger to dump output to on info and errors
    */
-  private def bootstrapSetupTools(sitePackages: Path, ezSetup: Path, log: Logger) {
+  private def bootstrapSetupTools(jythonHome: Path, sitePackages: Path,
+                                  ezSetup: Path, log: Logger) {
+
     log.warn("ez_setup missing from %s. downloading".format(ezSetup))
     sitePackages.asFile.mkdirs()
     val file = ezSetup.asFile
     file.createNewFile
     log.info("Downloading from %s to %s".format(easySetupUrl, file))
     FileUtilities.download(easySetupUrl, file, log)
+    log.info("Installing setuptools")
+
+    val args = ezSetup.absolutePath ::
+               "--find-links" :: "http://pypi.python.org/simple" ::
+               "--always-copy" ::
+               "--install-dir" :: sitePackages.absolutePath ::
+               "-S" :: sitePackages.absolutePath ::
+               "setuptools==0.6c9" :: Nil
+
+    execute(jythonHome, args, LoggedOutput(log))
   }
 }

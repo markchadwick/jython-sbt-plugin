@@ -10,7 +10,7 @@ import _root_.sbt._
  * to fine <cc>nosetests</cc>
  */
 trait NoseTests extends JythonProject {
-  easy_install("nose")
+  easy_install("nose==0.11.3")
 
   lazy val nosetestsExecutablePath = jythonPackagePath / "nosetests"
 
