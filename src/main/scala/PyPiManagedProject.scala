@@ -30,6 +30,8 @@ class JythonDependency(val query: String, var url: Option[String]) {
     case None => new URL(pypiUrl)
     case Some(u) => new URL(u)
   }
+
+  override def toString = query
 }
 
 trait PyPiManagedProject extends BasicManagedProject {
@@ -49,13 +51,14 @@ trait PyPiManagedProject extends BasicManagedProject {
 
     jythonDependences.foreach(dep => depsByLoc add (dep.repoUrl, dep))
 
-    jythonDependences.find(dep => {
-      log.info("Installing %s from %s".format(dep.query, dep.repoUrl))
-      Jython.easyInstall(dep.query, dep.repoUrl, sitePackages, jythonHome, log) != 0
+    depsByLoc.find(dep => {
+      val (location, dependencies) = dep
+      val queries = dependencies.map(_.query).toList
+      log.info("Installing %s from %s".format(queries.mkString(", "), location))
+      Jython.easyInstall(queries, location, sitePackages, jythonHome, log) != 0
     }) match {
       case None => 
-      case Some(failedDep) =>
-        log.warn("Error installing "+ failedDep.query)
+      case Some(failedDep) => log.warn("Error installing "+ failedDep)
     }
 
     None
