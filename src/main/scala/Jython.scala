@@ -37,7 +37,7 @@ object Jython {
    * version of Jython installed, an another defined in your project (This will
    * always used the installed version).
    */
-  def execute(jythonHome: Path, args: List[String], log: OutputStrategy): Int = {
+  def execute(args: List[String], jythonHome: Path, log: OutputStrategy): Int = {
     val classpath = Path.makeString(jythonJar(jythonHome) ::
                                     jythonLib(jythonHome) ::
                                     pythonPaths)
@@ -48,19 +48,18 @@ object Jython {
                    "-Dpython.path=%s".format(classpath) ::
                    "-Djython.path=%s".format(classpath) ::
                    "-Dpython.executable=%s".format(jythonExe(jythonHome).absolutePath) ::
-                   jythonMain ::
-                   args
+                   jythonMain :: args
 
     Fork.java(None, javaArgs, None, jythonEnv(jythonHome), log)
   }
 
   def jythonEnv(jythonHome: Path) =
     Map("JYTHON_HOME"-> jythonHome.absolutePath,
-        "PYTHONPATH" -> Path.makeString(pythonPaths))
+        "PYTHONPATH" -> Path.makeString(jythonLib(jythonHome) :: pythonPaths))
 
   def setupJythonEnv(jythonHome: Path) =
     Map("jython.home" -> jythonHome.absolutePath,
-        "python.path" -> Path.makeString(pythonPaths))
+        "python.path" -> Path.makeString(jythonLib(jythonHome) :: pythonPaths))
        .foreach(param => System.setProperty(param._1, param._2)) 
 
   /**
@@ -89,7 +88,7 @@ object Jython {
                "-S" :: sitePackages.absolutePath ::
                queries
 
-    execute(jythonHome, args, LoggedOutput(log))
+    execute(args, jythonHome, LoggedOutput(log))
   }
 
   /**
@@ -137,8 +136,8 @@ object Jython {
                "--always-copy" ::
                "--install-dir" :: sitePackages.absolutePath ::
                "-S" :: sitePackages.absolutePath ::
-               "setuptools==0.6c9" :: Nil
+               "setuptools" :: Nil
 
-    execute(jythonHome, args, LoggedOutput(log))
+    execute(args, jythonHome, LoggedOutput(log))
   }
 }

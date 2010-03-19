@@ -31,7 +31,9 @@ trait JythonProject extends BasicScalaProject
    * a Jython project. This may be a bit excessive.
    */
   def registerJythonPathAction = task {
-    Jython.registerPath(jythonPackagePath)
+    val installedEggs: PathFinder = jythonPackagePath * "*.egg" 
+    installedEggs.get.foreach(egg => Jython.registerPath(egg))
+
     Jython.registerPath(mainJythonOutputPath)
     Jython.registerPath(mainCompilePath)
     Jython.registerPath(testCompilePath)
@@ -58,7 +60,7 @@ trait JythonProject extends BasicScalaProject
    * be an impossibe task. At a code level, they are quite similar.
    */
   protected def jythonConsoleAction = interactiveTask {
-    Jython.execute(jythonHome, Nil, StdoutOutput) match {
+    Jython.execute(Nil, jythonHome, StdoutOutput) match {
       case 0 => None
       case i => Some("Jython Console Failed with error: "+ i)
     }
