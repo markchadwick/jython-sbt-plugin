@@ -15,7 +15,7 @@ import _root_.sbt.OutputStrategy
  * dependecy on Jython).
  */
 object Jython {
-  private var pythonPaths: List[Path] = Nil
+  private var pythonPaths = Set.empty[Path]
 
   val easySetupUrl = new URL("http://peak.telecommunity.com/dist/ez_setup.py")
 
@@ -26,10 +26,10 @@ object Jython {
   def jythonLib(jythonHome: Path) = jythonHome / "Lib"
 
   def registerPath(pythonPath: Path) = 
-    this.pythonPaths ::= pythonPath
+    this.pythonPaths += pythonPath
 
   def registerJars(jars: Iterable[File]) =
-    this.pythonPaths :::= jars.map(jar => Path.fromFile(jar)).toList
+    jars.foreach(jar => registerPath(Path.fromFile(jar)))
 
   /**
    * Given a set of params, fork a Jython process. This will use a full install
@@ -38,9 +38,8 @@ object Jython {
    * always used the installed version).
    */
   def execute(args: List[String], jythonHome: Path, log: OutputStrategy): Int = {
-    val classpath = Path.makeString(jythonJar(jythonHome) ::
-                                    jythonLib(jythonHome) ::
-                                    pythonPaths)
+    val classpath = Path.makeString(pythonPaths + jythonJar(jythonHome) +
+                                    jythonLib(jythonHome))
 
     val javaArgs = "-Xmx512m" :: "-Xss1024k" ::
                    "-classpath" :: classpath ::
@@ -55,11 +54,11 @@ object Jython {
 
   def jythonEnv(jythonHome: Path) =
     Map("JYTHON_HOME"-> jythonHome.absolutePath,
-        "PYTHONPATH" -> Path.makeString(jythonLib(jythonHome) :: pythonPaths))
+        "PYTHONPATH" -> Path.makeString(pythonPaths + jythonLib(jythonHome)))
 
   def setupJythonEnv(jythonHome: Path) =
     Map("jython.home" -> jythonHome.absolutePath,
-        "python.path" -> Path.makeString(jythonLib(jythonHome) :: pythonPaths))
+        "python.path" -> Path.makeString(pythonPaths + jythonLib(jythonHome)))
        .foreach(param => System.setProperty(param._1, param._2)) 
 
   /**
