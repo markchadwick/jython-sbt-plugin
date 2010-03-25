@@ -13,15 +13,13 @@ trait NoseTests extends JythonProject {
   easy_install("nose==0.11.3")
 
   lazy val nosetestsExecutablePath = jythonPackagePath / "nosetests"
-   /*
-  lazy val nosetestsExecutablePath =
-    jythonPackagePath / "nose-0.11.3-py2.5.egg" / "nose" / "core.py"
-  */
 
-  protected def nosetestTask(testRoot: Path) = task {
+  def noseArgs = "-Psv"
+
+  protected def nosetestTask(testRoot: Path) = interactiveTask {
     val args = nosetestsExecutablePath.absolutePath ::
                testJythonOutputPath.absolutePath :: 
-               "-Psv" :: Nil
+               noseArgs :: Nil
 
     Jython.execute(args, jythonHome, StdoutOutput) match {
       case 0 => None
