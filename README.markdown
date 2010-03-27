@@ -15,15 +15,19 @@ you don't have any plugins yet, you'll need to edit
     import sbt._
 
     class Plugins(info: ProjectInfo) extends PluginDefinition(info) {
-      val jython = "com.hipstersinc" % "jython-sbt" % "0.1"
+      val jython = "com.hipstersinc" % "jython-sbt" % "0.1.4" from
+        "http://github.com/downloads/markchadwick/jython-sbt-plugin/jython-sbt-0.1.4.jar"
     }
 
 The next time you start sbt, it should set that up. If it explodes, try
 downloading the source, and executing `sbt publish-local` to get it into your
-local repository.
+local repository. Take note that I'm pretty lazy, and the particular version
+mentioned above probably isn't recent.
 
 Next, mixin the `JythonProject` trait into your project, and define where your
-local Jython install is.
+local Jython install is. You have to do this so Jython can bootstrap itself to
+resolve dependencies. I'd recommend installing the most recent Jython, though
+others may work.
 
     import sbt._
     import jython.sbt._
@@ -41,7 +45,7 @@ build, your files will synchronized to `target/python`, and the test files will
 be in `target/test-python`.
 
 The paths will be managed for you, so you should be able to import JVM classes
-directly in your jython code.
+directly in your Jython code.
 
 Managing Dependencies
 ---------------------
@@ -76,7 +80,7 @@ try to install something with C extensions.
 
 Running Tests
 -------------
-There is an included mixing to run `nosetests` for you. If you'd like to have
+There is an included mixin to run `nosetests` for you. If you'd like to have
 nose run your test suite, simply mix in the `NoseTests` trait. You'll see that
 you now have a `nosetests` SBT action.
 
