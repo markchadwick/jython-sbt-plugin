@@ -14,23 +14,31 @@ trait NoseTests extends JythonProject {
 
   lazy val nosetestsExecutablePath = jythonPackagePath / "nosetests"
 
-  def noseArgs = "-Psv"
+  protected def runNose(args: Seq[String]): Option[String] = {
+    val noseArgs = nosetestsExecutablePath :: args.toList
 
-  protected def nosetestTask(testRoot: Path) = interactiveTask {
-    val args = nosetestsExecutablePath.absolutePath ::
-               testJythonOutputPath.absolutePath :: 
-               noseArgs :: Nil
-
-    Jython.execute(args, jythonHome, StdoutOutput) match {
+    Jython.execute(noseArgs.map(_.toString), jythonHome, StdoutOutput) match {
       case 0 => None
       case i => Some("nosetests Failed with error: "+ i)
     }
   }
 
-  protected def nosetestAction = nosetestTask(testJythonPath)
+  protected lazy val testDeps = registerJythonPathAction :: testCompile ::
+                     copyResources :: copyTestResources :: Nil
 
-  lazy val nosetests = nosetestAction
-                        .dependsOn(registerJythonPathAction, testCompile,
-                                   copyResources, copyTestResources)
-                        .describedAs("Run nosetests")
+  private lazy val nosetestAction = task({ args =>
+    val testDirectory = testJythonOutputPath.absolutePath
+    val (localFiles, flags) = args.partition(_.startsWith("./"))
+
+    val files = if(localFiles.isEmpty) testDirectory :: Nil
+                else localFiles.map(testDirectory + "/" + _)
+
+    task {
+      runNose(flags ++ files)
+    }.dependsOn(testDeps:_*)
+  }).completeWith(testJythonResources.get
+                    .filter(! _.isDirectory)
+                    .map(_.toString).toList)
+
+  lazy val nosetests = nosetestAction.describedAs("Run nosetests")
 }
