@@ -1,0 +1,4 @@
+0.1.5 2010-03-27
+----------------
+  * Rewritten nosetest runner with test name autocompletion and command line
+    nose flags.
