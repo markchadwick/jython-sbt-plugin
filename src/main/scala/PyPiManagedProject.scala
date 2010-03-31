@@ -72,7 +72,8 @@ trait PyPiManagedProject extends BasicManagedProject with JythonPaths {
   implicit def stringToDependency(name: String) =
     new JythonDependency(name, None)
 
-  override def updateAction =
-    super.updateAction.dependsOn(updateJythonAction)  
+  override def updateAction = task {
+    updateJythonDependencies(sitePackagesPath)
+  }.dependsOn(super.updateAction)
 }
 
