@@ -33,10 +33,13 @@ trait JythonPaths extends MavenStyleScalaPaths {
   def testJythonOutputPath = outputPath / DefaultJythonOutputTestName
 
   def jythonPackagePath = DefaultJythonContainerPath / DefaultJythonPackagesName
+  def jythonPackages = descendents(jythonPackagePath ##, "*.egg")
   def jythonLibraryPath = jythonHome / "Lib"
 
   def mainJythonResources = descendents(mainJythonPath ##, "*")
   def testJythonResources = descendents(testJythonPath ##, "*")
-  def thirdPartyJythonResources = descendents(jythonPackagePath ##, "*")
-  def jythonLibraryResrouces = descendents(jythonLibraryPath ##, "*")
+  def jythonLibraryResrouces = descendents(jythonLibraryPath ##, "*.py")
+
+  def thirdPartyJythonResources =
+    jythonPackages.get.foldLeft(Path.emptyPathFinder)(_ +++ _)
 }

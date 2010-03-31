@@ -83,6 +83,7 @@ object Jython {
     val args = easyInstallPath.absolutePath ::
                "--find-links" :: repo.toString ::
                "--always-copy" ::
+               "--always-unzip" ::
                "--install-dir" :: sitePackages.absolutePath ::
                "-S" :: sitePackages.absolutePath ::
                queries

@@ -13,6 +13,7 @@ trait NoseTests extends JythonProject {
   easy_install("nose==0.11.3")
 
   lazy val nosetestsExecutablePath = jythonPackagePath / "nosetests"
+  lazy val nosetestsTestPath = testResourcesOutputPath // testJythonOutputPath
 
   protected def runNose(args: Seq[String]): Option[String] = {
     val noseArgs = nosetestsExecutablePath :: args.toList
@@ -23,11 +24,13 @@ trait NoseTests extends JythonProject {
     }
   }
 
-  protected lazy val testDeps = registerJythonPathAction :: testCompile ::
-                     copyResources :: copyTestResources :: Nil
+  protected lazy val testDeps = testCompile ::
+                                copyResources ::
+                                copyTestResources ::
+                                Nil
 
   private lazy val nosetestAction = task({ args =>
-    val testDirectory = testJythonOutputPath.absolutePath
+    val testDirectory = nosetestsTestPath.absolutePath
     val (localFiles, flags) = args.partition(_.startsWith("./"))
 
     val files = if(localFiles.isEmpty) testDirectory :: Nil

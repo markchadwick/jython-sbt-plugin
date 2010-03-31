@@ -57,7 +57,8 @@ trait PyPiManagedProject extends BasicManagedProject with JythonPaths {
       Jython.easyInstall(queries, location, sitePackages, jythonHome, log) != 0
     }) match {
       case None => 
-      case Some(failedDep) => log.warn("Error installing "+ failedDep)
+      case Some(failedDep) =>
+        log.warn("Error installing %s from %s".format(failedDep._2, failedDep._1))
     }
 
     None
