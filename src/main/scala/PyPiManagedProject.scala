@@ -44,7 +44,7 @@ trait PyPiManagedProject extends BasicManagedProject with JythonPaths {
     dependency
   }
 
-  def updateJythonDependencies(sitePackages: Path) = {
+  def updateJythonDependencies(sitePackages: Path, binPath: Path) = {
     val depsByLoc = new HashMap[URL, Set[JythonDependency]]
                         with MultiMap[URL, JythonDependency]
 
@@ -54,7 +54,7 @@ trait PyPiManagedProject extends BasicManagedProject with JythonPaths {
       val (location, dependencies) = dep
       val queries = dependencies.map(_.query).toList
       log.info("Installing %s from %s".format(queries.mkString(", "), location))
-      Jython.easyInstall(queries, location, sitePackages, jythonHome, log) != 0
+      Jython.easyInstall(queries, location, sitePackages, binPath, jythonHome, log) != 0
     }) match {
       case None => 
       case Some(failedDep) =>
@@ -65,11 +65,8 @@ trait PyPiManagedProject extends BasicManagedProject with JythonPaths {
   }
 
   lazy val updateJythonAction  = task {
-    updateJythonDependencies(jythonPackagePath)
+    updateJythonDependencies(jythonEggInstallPath, jythonEggBinPath)
   }
-
-  override def mainResources =
-    thirdPartyJythonResources +++ super.mainResources
 
   implicit def stringToDependency(name: String) =
     new JythonDependency(name, None)

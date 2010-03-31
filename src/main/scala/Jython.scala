@@ -76,14 +76,14 @@ object Jython {
    * @param log Logger to dump info and errors to
    * @returns 0 if successful, otherwise 1
    */
-  def easyInstall(queries: List[String], repo: URL, sitePackages: Path, jythonHome: Path, log: Logger) = {
+  def easyInstall(queries: List[String], repo: URL, sitePackages: Path, binDirectory: Path, jythonHome: Path, log: Logger) = {
     val easySetupPath = sitePackages / "ez_setup.py"
     val easyInstallPath = sitePackages / "easy_install"
     ensureSetupTools(jythonHome, sitePackages, easySetupPath, log)
     val args = easyInstallPath.absolutePath ::
                "--find-links" :: repo.toString ::
                "--always-copy" ::
-               "--always-unzip" ::
+               "--script-dir" :: binDirectory.absolutePath ::
                "--install-dir" :: sitePackages.absolutePath ::
                "-S" :: sitePackages.absolutePath ::
                queries
