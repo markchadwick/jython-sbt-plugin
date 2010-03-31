@@ -12,7 +12,7 @@ import _root_.sbt._
 trait NoseTests extends JythonProject {
   easy_install("nose==0.11.3")
 
-  lazy val nosetestsExecutablePath = outputPath / "resources" / "bin" / "nosetests"
+  lazy val nosetestsExecutablePath = mainResourcesOutputPath / "nosetests"
   lazy val nosetestsTestPath = testResourcesOutputPath
 
   protected def runNose(args: Seq[String]): Option[String] = {

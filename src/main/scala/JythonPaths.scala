@@ -33,8 +33,6 @@ trait JythonPaths extends MavenStyleScalaPaths {
   def testJythonOutputPath = outputPath / DefaultJythonOutputTestName
 
   def sitePackagesPath = DefaultJythonContainerPath / DefaultJythonPackagesName
-  def jythonEggInstallPath = sitePackagesPath / "__pyclasspath__"
-  def jythonEggBinPath = sitePackagesPath / "bin"
 
   def jythonLibraryPath = jythonHome / "Lib"
 
