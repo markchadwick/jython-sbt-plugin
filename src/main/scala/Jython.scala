@@ -54,13 +54,9 @@ object Jython {
     val javaArgs = "-classpath" :: classpathStr ::
                    "-Dpython.path=%s".format(classpathStr) ::
                    "-Djython.path=%s".format(classpathStr) ::
+                   "-Dpython.executable=/opt/jython/jython" ::
                    jythonMain :: args
 
-    println("------------------------------------------")
-    println("* Calling Java with %s".format(javaArgs))
-    println("* Incoming classpath was: "+ classpath)
-    println("* Incoming classpath was getted: "+ classpath.get)
-    println("------------------------------------------")
     Fork.java(None, javaArgs, None, log)
   }
 
@@ -88,10 +84,12 @@ object Jython {
    * @param log Logger to dump info and errors to
    * @returns 0 if successful, otherwise 1
    */
-  def easyInstall(queries: List[String], repo: URL, sitePackages: Path, jythonHome: Path, log: Logger) = {
+  def easyInstall(queries: List[String], repo: URL, setuptoolsVersion: String,
+                  sitePackages: Path, jythonHome: Path, log: Logger) = {
+
     val easySetupPath = sitePackages / "ez_setup.py"
     val easyInstallPath = sitePackages / "easy_install"
-    ensureSetupTools(jythonHome, sitePackages, easySetupPath, log)
+    ensureSetupTools(jythonHome, setuptoolsVersion, sitePackages, easySetupPath, log)
     val args = easyInstallPath.absolutePath ::
                "--find-links" :: repo.toString ::
                "--always-copy" ::
@@ -100,11 +98,14 @@ object Jython {
                "-S" :: sitePackages.absolutePath ::
                queries
 
-    val classpath = (sitePackages ##)+++
+    val setuptoolsPath = sitePackages /
+                         "setuptools-%s-py2.5.egg".format(setuptoolsVersion)
+
+    val classpath = (sitePackages ##) +++
+                    (setuptoolsPath ##) +++ 
                     jythonJar(jythonHome) +++
                     jythonLib(jythonHome)
-    println("* Easy-installing with classpath: "+ classpath)
-    println("* Easy-installing getted: "+ classpath.get)
+
     execute(args, classpath, LoggedOutput(log))
   }
 
@@ -118,11 +119,12 @@ object Jython {
    * @param ezSetup Path of the expected ez_setup boostrapping script
    * @param log Logger to dump info and errors to
    */
-  private def ensureSetupTools(jythonHome: Path, sitePackages: Path,
-                               ezSetup: Path, log: Logger) =
+  private def ensureSetupTools(jythonHome: Path, setuptoolsVersion: String,
+                               sitePackages: Path, ezSetup: Path, log: Logger) =
     ezSetup.exists match {
       case true => log.info("ez_setup exists")
-      case false => bootstrapSetupTools(jythonHome, sitePackages, ezSetup, log)
+      case false => bootstrapSetupTools(jythonHome, setuptoolsVersion,
+                                        sitePackages, ezSetup, log)
     }
 
   /**
@@ -137,8 +139,8 @@ object Jython {
    * @param ezSetup Path to download the bootstrapping scrip to
    * @param log Logger to dump output to on info and errors
    */
-  private def bootstrapSetupTools(jythonHome: Path, sitePackages: Path,
-                                  ezSetup: Path, log: Logger) {
+  private def bootstrapSetupTools(jythonHome: Path, setuptoolsVersion: String,
+                                  sitePackages: Path, ezSetup: Path, log: Logger) {
 
     log.warn("ez_setup missing from %s. downloading".format(ezSetup))
     sitePackages.asFile.mkdirs()
@@ -148,12 +150,14 @@ object Jython {
     FileUtilities.download(easySetupUrl, file, log)
     log.info("Installing setuptools")
 
+    val query = "setuptools==%s".format(setuptoolsVersion)
     val args = ezSetup.absolutePath ::
                "--find-links" :: "http://pypi.python.org/simple" ::
                "--always-copy" ::
+               "--always-unzip" ::
                "--install-dir" :: sitePackages.absolutePath ::
                "-S" :: sitePackages.absolutePath ::
-               "setuptools" :: Nil
+               query :: Nil
     val classpath = (sitePackages ##) +++
                     jythonJar(jythonHome) +++
                     jythonLib(jythonHome)

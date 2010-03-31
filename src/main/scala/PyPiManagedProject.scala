@@ -36,6 +36,7 @@ class JythonDependency(val query: String, var url: Option[String]) {
 
 trait PyPiManagedProject extends BasicManagedProject with JythonPaths {
   private var jythonDependences: List[JythonDependency] = Nil
+  val setuptoolsVersion = "0.6c11"
 
   def jythonHome: Path
 
@@ -54,7 +55,7 @@ trait PyPiManagedProject extends BasicManagedProject with JythonPaths {
       val (location, dependencies) = dep
       val queries = dependencies.map(_.query).toList
       log.info("Installing %s from %s".format(queries.mkString(", "), location))
-      Jython.easyInstall(queries, location, sitePackages, jythonHome, log) != 0
+      Jython.easyInstall(queries, location, setuptoolsVersion, sitePackages, jythonHome, log) != 0
     }) match {
       case None => 
       case Some(failedDep) =>
