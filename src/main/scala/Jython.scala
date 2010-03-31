@@ -4,10 +4,11 @@ import java.io.File
 import java.net.URL
 import _root_.sbt.FileUtilities
 import _root_.sbt.Fork
-import _root_.sbt.Logger
-import _root_.sbt.Path
 import _root_.sbt.LoggedOutput
+import _root_.sbt.Logger
 import _root_.sbt.OutputStrategy
+import _root_.sbt.Path
+import _root_.sbt.PathFinder
 
 /**
  * Utility for forking Jython processes configured for this project. These
@@ -37,10 +38,10 @@ object Jython {
    * version of Jython installed, an another defined in your project (This will
    * always used the installed version).
    */
-  def execute(args: List[String], jythonHome: Path, log: OutputStrategy): Int = {
-    val classpath = Path.makeString(pythonPaths + jythonJar(jythonHome) +
-                                    jythonLib(jythonHome))
+  def execute(args: List[String], classpath: PathFinder, log: OutputStrategy): Int = {
+    val classpathStr = Path.makeString(classpath.get)
 
+    /*
     val javaArgs = "-Xmx512m" :: "-Xss1024k" ::
                    "-classpath" :: classpath ::
                    "-Dpython.home=%s".format(jythonHome.absolutePath) ::
@@ -48,8 +49,19 @@ object Jython {
                    "-Djython.path=%s".format(classpath) ::
                    "-Dpython.executable=%s".format(jythonExe(jythonHome).absolutePath) ::
                    jythonMain :: args
+    */
 
-    Fork.java(None, javaArgs, None, jythonEnv(jythonHome), log)
+    val javaArgs = "-classpath" :: classpathStr ::
+                   "-Dpython.path=%s".format(classpathStr) ::
+                   "-Djython.path=%s".format(classpathStr) ::
+                   jythonMain :: args
+
+    println("------------------------------------------")
+    println("* Calling Java with %s".format(javaArgs))
+    println("* Incoming classpath was: "+ classpath)
+    println("* Incoming classpath was getted: "+ classpath.get)
+    println("------------------------------------------")
+    Fork.java(None, javaArgs, None, log)
   }
 
   def jythonEnv(jythonHome: Path) =
@@ -83,11 +95,17 @@ object Jython {
     val args = easyInstallPath.absolutePath ::
                "--find-links" :: repo.toString ::
                "--always-copy" ::
+               "--always-unzip" ::
                "--install-dir" :: sitePackages.absolutePath ::
                "-S" :: sitePackages.absolutePath ::
                queries
 
-    execute(args, jythonHome, LoggedOutput(log))
+    val classpath = (sitePackages ##)+++
+                    jythonJar(jythonHome) +++
+                    jythonLib(jythonHome)
+    println("* Easy-installing with classpath: "+ classpath)
+    println("* Easy-installing getted: "+ classpath.get)
+    execute(args, classpath, LoggedOutput(log))
   }
 
   /**
@@ -136,7 +154,9 @@ object Jython {
                "--install-dir" :: sitePackages.absolutePath ::
                "-S" :: sitePackages.absolutePath ::
                "setuptools" :: Nil
-
-    execute(args, jythonHome, LoggedOutput(log))
+    val classpath = (sitePackages ##) +++
+                    jythonJar(jythonHome) +++
+                    jythonLib(jythonHome)
+    execute(args, classpath, LoggedOutput(log))
   }
 }

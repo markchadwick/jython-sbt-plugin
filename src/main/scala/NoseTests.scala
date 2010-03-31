@@ -10,15 +10,16 @@ import _root_.sbt._
  * to fine <cc>nosetests</cc>
  */
 trait NoseTests extends JythonProject {
-  easy_install("nose==0.11.3")
+  val noseVersion = "0.11.3"
+  easy_install("nose==%s".format(noseVersion))
 
-  lazy val nosetestsExecutablePath = mainResourcesOutputPath / "nosetests"
+  lazy val nosetestsExecutablePath = mainResourcesOutputPath / "nose" / "core.py"
   lazy val nosetestsTestPath = testResourcesOutputPath
 
   protected def runNose(args: Seq[String]): Option[String] = {
     val noseArgs = nosetestsExecutablePath :: args.toList
 
-    Jython.execute(noseArgs.map(_.toString), jythonHome, StdoutOutput) match {
+    Jython.execute(noseArgs.map(_.toString), testClasspath, StdoutOutput) match {
       case 0 => None
       case i => Some("nosetests Failed with error: "+ i)
     }
