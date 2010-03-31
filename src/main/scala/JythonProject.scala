@@ -74,6 +74,13 @@ trait JythonProject extends BasicScalaProject
   lazy val copyJythonTestResources = copyTestJythonResourcesAction
   lazy val setupJythonEnv          = setupJythonEnvAction dependsOn(registerJythonPathAction)
 
+  override def mainResources =
+    mainJythonResources +++ jythonLibraryResrouces +++ super.mainResources
+
+  /*
+  override def optionalClasspath =
+    mainJythonResources +++ super.optionalClasspath
+
   override def copyResourcesAction =
     super.copyResourcesAction.dependsOn(copyJythonResources)
 
@@ -82,4 +89,5 @@ trait JythonProject extends BasicScalaProject
 
   override def compileAction =
     super.compileAction.dependsOn(setupJythonEnv)
+  */
 }

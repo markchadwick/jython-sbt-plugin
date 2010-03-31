@@ -12,8 +12,8 @@ import _root_.sbt._
  * the method which strings them together. Look a <cc>mainJythonPath</cc> for
  * example.
  */
-trait JythonPaths extends MavenStyleScalaPaths 
-                  with BasicDependencyPaths {
+trait JythonPaths extends MavenStyleScalaPaths {
+  def jythonHome: Path
 
   val DefaultJythonSourceName    = "python"
   val DefaultJythonTestName      = "python"
@@ -33,7 +33,10 @@ trait JythonPaths extends MavenStyleScalaPaths
   def testJythonOutputPath = outputPath / DefaultJythonOutputTestName
 
   def jythonPackagePath = DefaultJythonContainerPath / DefaultJythonPackagesName
+  def jythonLibraryPath = jythonHome / "Lib"
 
   def mainJythonResources = descendents(mainJythonPath ##, "*")
   def testJythonResources = descendents(testJythonPath ##, "*")
+  def thirdPartyJythonResources = descendents(jythonPackagePath ##, "*")
+  def jythonLibraryResrouces = descendents(jythonLibraryPath ##, "*")
 }

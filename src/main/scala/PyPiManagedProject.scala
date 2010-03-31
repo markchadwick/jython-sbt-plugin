@@ -34,10 +34,9 @@ class JythonDependency(val query: String, var url: Option[String]) {
   override def toString = query
 }
 
-trait PyPiManagedProject extends BasicManagedProject {
+trait PyPiManagedProject extends BasicManagedProject with JythonPaths {
   private var jythonDependences: List[JythonDependency] = Nil
 
-  def jythonPackagePath: Path
   def jythonHome: Path
 
   def easy_install(dependency: JythonDependency) = {
@@ -67,6 +66,9 @@ trait PyPiManagedProject extends BasicManagedProject {
   lazy val updateJythonAction  = task {
     updateJythonDependencies(jythonPackagePath)
   }
+
+  override def mainResources =
+    thirdPartyJythonResources +++ super.mainResources
 
   implicit def stringToDependency(name: String) =
     new JythonDependency(name, None)
