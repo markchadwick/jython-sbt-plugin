@@ -1,3 +1,8 @@
+0.1.6 2010-04-05
+----------------
+  * Reworking of how the path is maintained and built. You'll likely need to
+    blow away all site-packages directories, and update from scratch
+
 0.1.5 2010-03-27
 ----------------
   * Rewritten nosetest runner with test name autocompletion and command line
