@@ -18,8 +18,10 @@ trait NoseTests extends JythonProject {
 
   protected def runNose(args: Seq[String]): Option[String] = {
     val noseArgs = nosetestsExecutablePath :: args.toList
+    val classpath = testClasspath +++ runClasspath +++ compileClasspath +++
+                    Path.fromFile(buildScalaInstance.libraryJar)
 
-    Jython.execute(noseArgs.map(_.toString), testClasspath, StdoutOutput) match {
+    Jython.execute(noseArgs.map(_.toString), classpath, StdoutOutput) match {
       case 0 => None
       case i => Some("nosetests Failed with error: "+ i)
     }

@@ -41,16 +41,6 @@ object Jython {
   def execute(args: List[String], classpath: PathFinder, log: OutputStrategy): Int = {
     val classpathStr = Path.makeString(classpath.get)
 
-    /*
-    val javaArgs = "-Xmx512m" :: "-Xss1024k" ::
-                   "-classpath" :: classpath ::
-                   "-Dpython.home=%s".format(jythonHome.absolutePath) ::
-                   "-Dpython.path=%s".format(classpath) ::
-                   "-Djython.path=%s".format(classpath) ::
-                   "-Dpython.executable=%s".format(jythonExe(jythonHome).absolutePath) ::
-                   jythonMain :: args
-    */
-
     val javaArgs = "-classpath" :: classpathStr ::
                    "-Dpython.path=%s".format(classpathStr) ::
                    "-Djython.path=%s".format(classpathStr) ::

@@ -1,3 +1,7 @@
+0.1.7 2010-05-07
+----------------
+  * Manually including scala-library.jar into path for 2.8 projects
+
 0.1.6 2010-04-05
 ----------------
   * Reworking of how the path is maintained and built. You'll likely need to

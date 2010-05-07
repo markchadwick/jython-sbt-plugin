@@ -15,8 +15,8 @@ you don't have any plugins yet, you'll need to edit
     import sbt._
 
     class Plugins(info: ProjectInfo) extends PluginDefinition(info) {
-      val jython = "com.hipstersinc" % "jython-sbt" % "0.1.5" from
-        "http://github.com/downloads/markchadwick/jython-sbt-plugin/jython-sbt-0.1.5.jar"
+      val jython = "com.hipstersinc" % "jython-sbt" % "0.1.7" from
+        "http://github.com/downloads/markchadwick/jython-sbt-plugin/jython-sbt-0.1.7.jar"
     }
 
 The next time you start sbt, it should set that up. If it explodes, try
