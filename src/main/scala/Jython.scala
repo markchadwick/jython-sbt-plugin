@@ -38,7 +38,7 @@ object Jython {
    * version of Jython installed, an another defined in your project (This will
    * always used the installed version).
    */
-  def execute(args: List[String], classpath: PathFinder, log: OutputStrategy): Int = {
+  def execute(args: List[String], classpath: PathFinder, log: Logger): Int = {
     val classpathStr = Path.makeString(classpath.get)
 
     val javaArgs = "-classpath" :: classpathStr ::
@@ -47,6 +47,7 @@ object Jython {
                    "-Dpython.executable=/opt/jython/jython" ::
                    jythonMain :: args
 
+    log.debug("[Jython] java %s".format(javaArgs.mkString(" ")))
     Fork.java(None, javaArgs, None, log)
   }
 
@@ -96,7 +97,7 @@ object Jython {
                     jythonJar(jythonHome) +++
                     jythonLib(jythonHome)
 
-    execute(args, classpath, LoggedOutput(log))
+    execute(args, classpath, log)
   }
 
   /**
@@ -151,6 +152,6 @@ object Jython {
     val classpath = (sitePackages ##) +++
                     jythonJar(jythonHome) +++
                     jythonLib(jythonHome)
-    execute(args, classpath, LoggedOutput(log))
+    execute(args, classpath, log)
   }
 }

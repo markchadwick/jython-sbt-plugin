@@ -21,7 +21,7 @@ trait NoseTests extends JythonProject {
     val classpath = testClasspath +++ runClasspath +++ compileClasspath +++
                     Path.fromFile(buildScalaInstance.libraryJar)
 
-    Jython.execute(noseArgs.map(_.toString), classpath, StdoutOutput) match {
+    Jython.execute(noseArgs.map(_.toString), classpath, log) match {
       case 0 => None
       case i => Some("nosetests Failed with error: "+ i)
     }
