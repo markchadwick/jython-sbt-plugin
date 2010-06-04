@@ -1,3 +1,7 @@
+0.1.9 2010-07-04
+----------------
+  * Nosetests log to stdout
+
 0.1.8 2010-07-01
 ----------------
   * Chaning logging for Jython static functions

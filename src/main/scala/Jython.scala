@@ -6,6 +6,7 @@ import _root_.sbt.FileUtilities
 import _root_.sbt.Fork
 import _root_.sbt.LoggedOutput
 import _root_.sbt.Logger
+import _root_.sbt.StdoutOutput
 import _root_.sbt.OutputStrategy
 import _root_.sbt.Path
 import _root_.sbt.PathFinder
@@ -48,7 +49,7 @@ object Jython {
                    jythonMain :: args
 
     log.debug("[Jython] java %s".format(javaArgs.mkString(" ")))
-    Fork.java(None, javaArgs, None, log)
+    Fork.java(None, javaArgs, None, StdoutOutput)
   }
 
   def jythonEnv(jythonHome: Path) =
