@@ -38,7 +38,7 @@ trait JythonPaths extends MavenStyleScalaPaths {
 
   def mainJythonResources = descendents(mainJythonPath ##, "*")
   def testJythonResources = descendents(testJythonPath ##, "*")
-  def jythonLibraryResrouces = descendents(jythonLibraryPath ##, "*")
+  def jythonLibraryResources = descendents(jythonLibraryPath ##, "*")
   def jythonEggResources = 
     jythonEggs.get.foldLeft(Path.emptyPathFinder)((eggs, egg) => {
       /*
