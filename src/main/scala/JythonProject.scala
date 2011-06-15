@@ -13,10 +13,11 @@ trait JythonProject extends BasicScalaProject
   override def mainResources = 
     super.mainResources +++
     eggResources +++
-    jythonLibraryResrouces +++
+    jythonLibraryResources +++
     mainJythonResources
 
   private def eggResources = 
     jythonEggResources ---
-      descendents(jythonEggResources ##, "site.py*")
+      descendents(jythonEggResources ##, ("site.py*" | "site$py.*")) ---
+      (jythonEggResources / "EGG-INFO" ##) ** "*"
 }
